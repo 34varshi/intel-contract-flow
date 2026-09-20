@@ -110,7 +110,7 @@ const workflowSteps: WorkflowStep[] = [
   { label: "Summary", detail: "Final analysis completed", icon: Sparkle },
 ];
 
-const clauses = [
+const clauses: Array<[string, string, string]> = [
   ["Payment terms", "Monthly invoicing; Net 30 payment window. 1.5% monthly interest applies to late balances.", "Finance"],
   ["Termination", "Either party may terminate with 60 days written notice. Immediate termination applies for uncured material breach.", "Clause 9.2"],
   ["Renewal", "The agreement renews automatically for 12-month periods unless notice is delivered 30 days before expiry.", "Clause 3.4"],
@@ -121,7 +121,7 @@ const clauses = [
   ["Governing law", "The agreement is governed by the laws of Delaware, USA.", "Clause 14"],
 ];
 
-const risks = [
+const risks: Array<{ level: string; title: string; body: string; action: string; tone: string }> = [
   {
     level: "HIGH",
     title: "Automatic renewal trap",
@@ -152,14 +152,14 @@ const risks = [
   },
 ];
 
-const obligations = [
+const obligations: Array<[string, string, string, string, string]> = [
   ["Submit monthly service report", "Client", "15 Nov 2026", "Pending", "High"],
   ["Issue renewal or termination notice", "ABC Tech", "30 Jan 2027", "Scheduled", "High"],
   ["Quarterly invoice reconciliation", "XYZ Services", "05 Dec 2026", "On track", "Medium"],
   ["Complete data-security audit", "XYZ Services", "20 Dec 2026", "Pending", "Medium"],
 ];
 
-const dates = [
+const dates: Array<[string, string, string]> = [
   ["01 Mar 2026", "Contract effective", "start"],
   ["15 Nov 2026", "Monthly service report", "deadline"],
   ["05 Dec 2026", "Quarterly invoice reconciliation", "payment"],
@@ -177,6 +177,16 @@ const navItems = [
   ["AI Assistant", MessageCircle],
   ["Reports", ClipboardCheck],
 ] as const;
+
+const navSectionIds: Record<string, string> = {
+  Dashboard: "dashboard-home",
+  Contracts: "contracts-section",
+  Obligations: "obligations-section",
+  Risks: "risks-section",
+  "Important Dates": "dates-section",
+  "AI Assistant": "assistant-section",
+  Reports: "actions-section",
+};
 
 const answerFor = (question: string) => {
   const normalized = question.toLowerCase();
@@ -217,6 +227,15 @@ function ContractLens() {
     },
   ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleNavClick = (label: string) => {
+    setActiveNav(label);
+    setMobileNavOpen(false);
+    const sectionId = navSectionIds[label];
+    if (sectionId) {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const workflowStatus = useMemo(() => {
     return workflowSteps.map((_, index) => {
@@ -301,10 +320,7 @@ function ContractLens() {
                   activeNav === label && "bg-sidebar-accent text-sidebar-foreground shadow-none",
                 )}
                 key={label}
-                onClick={() => {
-                  setActiveNav(label);
-                  setMobileNavOpen(false);
-                }}
+                 onClick={() => handleNavClick(label)}
                 variant="ghost"
               >
                 <Icon className="size-4" />
@@ -353,7 +369,7 @@ function ContractLens() {
           </header>
 
           <main className="relative max-h-[calc(100vh-4rem)] overflow-y-auto px-4 pb-10 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-[1480px]">
+             <div className="mx-auto max-w-[1480px]" id="dashboard-home">
               <section className="mt-3 rounded-2xl border border-border/70 bg-card/65 p-4 shadow-soft backdrop-blur-xl" aria-label="Agent workflow">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <p className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">Agent workflow</p>
@@ -376,7 +392,7 @@ function ContractLens() {
                     );
                   })}
                 </div>
-                {isAnalyzing && <div className="mt-3 flex items-center gap-2 rounded-lg bg-brand/5 px-3 py-2 text-xs text-brand"><Loader2 className="size-3.5 animate-spin" /> <Shimmer>{workflowSteps[Math.min(workflowIndex, workflowSteps.length - 1)]?.detail ?? "Finishing analysis"}…</Shimmer></div>}
+                 {isAnalyzing && <div className="mt-3 flex items-center gap-2 rounded-lg bg-brand/5 px-3 py-2 text-xs text-brand"><Loader2 className="size-3.5 animate-spin" /> <Shimmer>{`${workflowSteps[Math.min(workflowIndex, workflowSteps.length - 1)]?.detail ?? "Finishing analysis"}…`}</Shimmer></div>}
               </section>
 
               <section className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Analysis statistics">
@@ -388,7 +404,7 @@ function ContractLens() {
 
               <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-12">
                 <div className="space-y-5 xl:col-span-8">
-                  <Card className="border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6">
+                   <Card className="scroll-mt-24 border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6" id="contracts-section">
                     <SectionHeading eyebrow="Contract overview" title="The agreement at a glance" action={<Badge className="border-brand/20 bg-brand/10 text-brand" variant="outline">Active</Badge>} />
                     <div className="mt-5 grid grid-cols-1 gap-x-10 gap-y-3 text-sm sm:grid-cols-2">
                       <OverviewRow label="Contract type" value="Services Agreement" />
@@ -402,21 +418,21 @@ function ContractLens() {
                     </div>
                   </Card>
 
-                  <Card className="border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6">
+                    <Card className="border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6">
                     <SectionHeading eyebrow="Key clauses" title="What the agent found" action={<Button className="gap-1.5 text-xs" size="sm" variant="ghost">View all <ChevronRight /></Button>} />
                     <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                       {clauses.map(([title, description, source]) => <ClauseCard description={description} key={title} source={source} title={title} />)}
                     </div>
                   </Card>
 
-                  <Card className="border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6">
+                    <Card className="scroll-mt-24 border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6" id="risks-section">
                     <SectionHeading eyebrow="Risk detection" title="Prioritized for action" action={<Button className="gap-1.5 text-xs" onClick={() => setShowRisksOnly((value) => !value)} size="sm" variant="ghost">{showRisksOnly ? "Show all" : "Focus high risk"} <ShieldAlert /></Button>} />
                     <div className="mt-4 space-y-3">
                       {risks.filter((risk) => !showRisksOnly || risk.level === "HIGH").map((risk) => <RiskCard key={risk.title} {...risk} />)}
                     </div>
                   </Card>
 
-                  <Card className="border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6">
+                    <Card className="scroll-mt-24 border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6" id="obligations-section">
                     <SectionHeading eyebrow="Obligations & deadlines" title="Keep the agreement moving" action={<Button className="gap-1.5 text-xs" onClick={() => setActiveNav("Obligations")} size="sm" variant="ghost">Open tracker <ChevronRight /></Button>} />
                     <div className="mt-4 overflow-x-auto">
                       <table className="w-full min-w-[650px] text-left text-xs">
@@ -426,7 +442,7 @@ function ContractLens() {
                     </div>
                   </Card>
 
-                  <Card className="border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6">
+                  <Card className="scroll-mt-24 border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6" id="dates-section">
                     <SectionHeading eyebrow="Important dates" title="A timeline the team can act on" action={<Button className="gap-1.5 text-xs" onClick={() => setActiveNav("Important Dates")} size="sm" variant="ghost">Open calendar <ChevronRight /></Button>} />
                     <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
                       {dates.map(([date, label, tone], index) => <div className="relative flex gap-3" key={date}>{index < dates.length - 1 && <div className="absolute left-[7px] top-5 hidden h-[calc(100%+1.5rem)] w-px bg-border sm:block" />}<div className={cn("relative z-10 mt-1 size-3 shrink-0 rounded-full ring-4", tone === "alert" || tone === "end" ? "bg-risk-high ring-risk-high/10" : tone === "deadline" ? "bg-risk-medium ring-risk-medium/10" : "bg-brand ring-brand/10")} /><div><p className="font-mono text-[11px] text-muted-foreground">{date}</p><p className="mt-1 text-xs font-medium">{label}</p></div></div>)}
@@ -435,16 +451,16 @@ function ContractLens() {
                 </div>
 
                 <div className="space-y-5 xl:col-span-4">
-                  <Card className="flex min-h-[480px] flex-col border-ink bg-ink p-5 text-ink-foreground shadow-deep sm:p-6 xl:sticky xl:top-20">
+                   <Card className="scroll-mt-24 flex min-h-[480px] flex-col border-ink bg-ink p-5 text-ink-foreground shadow-deep sm:p-6 xl:sticky xl:top-20" id="assistant-section">
                     <div className="flex items-start justify-between gap-3"><div><div className="flex items-center gap-2"><span className="size-2 animate-pulse rounded-full bg-accent" /><h2 className="text-sm font-semibold text-primary-foreground">Ask ContractLens</h2></div><p className="mt-1 text-xs text-ink-foreground/55">Grounded answers from this contract.</p></div><Button aria-label="Chat help" className="text-ink-foreground/60 hover:bg-primary-foreground/10 hover:text-primary-foreground" size="icon" variant="ghost"><CircleHelp /></Button></div>
-                    <Conversation className="mt-4 min-h-0 flex-1"><ConversationContent className="gap-4 p-0">{chatMessages.map((message) => <Message from={message.role} key={message.id}><MessageContent className={message.role === "user" ? "bg-primary text-primary-foreground" : "text-ink-foreground/80"}><MessageResponse>{message.text}</MessageResponse></MessageContent></Message>)}{isAnalyzing && <Message from="assistant"><MessageContent className="text-ink-foreground/55"><Shimmer>Reviewing the evidence…</Shimmer></MessageContent></Message>}</ConversationContent><ConversationScrollButton className="bg-ink text-primary-foreground" /></Conversation>
+                     <Conversation className="mt-4 min-h-0 flex-1"><ConversationContent className="gap-4 p-0">{chatMessages.map((message) => <Message from={message.role} key={message.id}><MessageContent className={message.role === "user" ? "bg-primary text-primary-foreground" : "!text-ink-foreground/80"}><MessageResponse>{message.text}</MessageResponse></MessageContent></Message>)}{isAnalyzing && <Message from="assistant"><MessageContent className="!text-ink-foreground/55"><Shimmer>Reviewing the evidence…</Shimmer></MessageContent></Message>}</ConversationContent><ConversationScrollButton className="bg-ink text-primary-foreground" /></Conversation>
                     <div className="mt-4 flex flex-wrap gap-1.5"><Suggestion text="What are the payment terms?" onClick={askQuestion} /><Suggestion text="Any automatic renewal clauses?" onClick={askQuestion} /><Suggestion text="What are the major risks?" onClick={askQuestion} /></div>
-                    <PromptInput className="mt-3 border-ink-foreground/15 bg-primary-foreground/5 text-primary-foreground" onSubmit={handleChatSubmit}><PromptInputTextarea className="min-h-12 text-xs text-primary-foreground placeholder:text-ink-foreground/40" onChange={(event) => setChatInput(event.target.value)} placeholder="Ask about this contract…" value={chatInput} /><PromptInputFooter className="justify-end border-0"><PromptInputSubmit className="bg-accent text-accent-foreground hover:bg-accent/90" /></PromptInputFooter></PromptInput>
+                     <PromptInput className="mt-3 border-ink-foreground/15 bg-primary-foreground/5 text-primary-foreground" onSubmit={(message, event) => { handleChatSubmit(event); if (message.text !== chatInput) askQuestion(message.text); }}><PromptInputTextarea className="min-h-12 text-xs text-primary-foreground placeholder:text-ink-foreground/40" onChange={(event) => setChatInput(event.target.value)} placeholder="Ask about this contract…" value={chatInput} /><PromptInputFooter className="justify-end border-0"><PromptInputSubmit className="bg-accent text-accent-foreground hover:bg-accent/90" /></PromptInputFooter></PromptInput>
                   </Card>
 
-                  <Card className="border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6">
+                   <Card className="scroll-mt-24 border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6" id="actions-section">
                     <SectionHeading eyebrow="AI actions" title="Turn insight into action" />
-                    <div className="mt-4 grid gap-2"><Button className="justify-start gap-2" onClick={() => setShowReminder(true)} variant="default"><Clock3 /> Create deadline reminder <ChevronRight className="ml-auto" /></Button><Button className="justify-start gap-2" onClick={() => setShowRisksOnly(true)} variant="outline"><ShieldAlert /> Show high-risk clauses <ChevronRight className="ml-auto" /></Button><Button className="justify-start gap-2" onClick={() => setShowSummary(true)} variant="outline"><PenLine /> Generate executive summary <ChevronRight className="ml-auto" /></Button><Button className="justify-start gap-2" onClick={() => askQuestion("Explain the liability clause in simple language.")} variant="outline"><Lightbulb /> Explain this clause <ChevronRight className="ml-auto" /></Button></div>
+                     <div className="mt-4 grid gap-2"><Button className="justify-start gap-2" onClick={() => setShowReminder(true)} variant="default"><Clock3 /> Create deadline reminder <ChevronRight className="ml-auto" /></Button><Button className="justify-start gap-2" onClick={() => setShowRisksOnly(true)} variant="outline"><ShieldAlert /> Show high-risk clauses <ChevronRight className="ml-auto" /></Button><Button className="justify-start gap-2" onClick={() => { setActiveNav("Obligations"); handleNavClick("Obligations"); }} variant="outline"><ListChecks /> Show all obligations <ChevronRight className="ml-auto" /></Button><Button className="justify-start gap-2" onClick={() => setShowSummary(true)} variant="outline"><PenLine /> Generate executive summary <ChevronRight className="ml-auto" /></Button><Button className="justify-start gap-2" onClick={() => askQuestion("Explain the liability clause in simple language.")} variant="outline"><Lightbulb /> Explain this clause <ChevronRight className="ml-auto" /></Button></div>
                   </Card>
 
                   <Card className="border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6"><div className="flex items-center gap-3"><div className="grid size-9 place-items-center rounded-xl bg-brand/10 text-brand"><LockKeyhole className="size-4" /></div><div><p className="text-sm font-semibold">Evidence-linked review</p><p className="mt-0.5 text-xs text-muted-foreground">Every insight is tied back to a clause or deadline.</p></div></div><div className="mt-4 flex items-center justify-between border-t border-border pt-4 text-xs"><span className="text-muted-foreground">Analysis confidence</span><span className="font-semibold text-success">97%</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full w-[97%] rounded-full bg-success" /></div></Card>
