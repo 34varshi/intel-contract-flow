@@ -110,7 +110,7 @@ const workflowSteps: WorkflowStep[] = [
   { label: "Summary", detail: "Final analysis completed", icon: Sparkle },
 ];
 
-const clauses = [
+const clauses: Array<[string, string, string]> = [
   ["Payment terms", "Monthly invoicing; Net 30 payment window. 1.5% monthly interest applies to late balances.", "Finance"],
   ["Termination", "Either party may terminate with 60 days written notice. Immediate termination applies for uncured material breach.", "Clause 9.2"],
   ["Renewal", "The agreement renews automatically for 12-month periods unless notice is delivered 30 days before expiry.", "Clause 3.4"],
@@ -121,7 +121,7 @@ const clauses = [
   ["Governing law", "The agreement is governed by the laws of Delaware, USA.", "Clause 14"],
 ];
 
-const risks = [
+const risks: Array<{ level: string; title: string; body: string; action: string; tone: string }> = [
   {
     level: "HIGH",
     title: "Automatic renewal trap",
@@ -152,14 +152,14 @@ const risks = [
   },
 ];
 
-const obligations = [
+const obligations: Array<[string, string, string, string, string]> = [
   ["Submit monthly service report", "Client", "15 Nov 2026", "Pending", "High"],
   ["Issue renewal or termination notice", "ABC Tech", "30 Jan 2027", "Scheduled", "High"],
   ["Quarterly invoice reconciliation", "XYZ Services", "05 Dec 2026", "On track", "Medium"],
   ["Complete data-security audit", "XYZ Services", "20 Dec 2026", "Pending", "Medium"],
 ];
 
-const dates = [
+const dates: Array<[string, string, string]> = [
   ["01 Mar 2026", "Contract effective", "start"],
   ["15 Nov 2026", "Monthly service report", "deadline"],
   ["05 Dec 2026", "Quarterly invoice reconciliation", "payment"],
@@ -392,7 +392,7 @@ function ContractLens() {
                     );
                   })}
                 </div>
-                {isAnalyzing && <div className="mt-3 flex items-center gap-2 rounded-lg bg-brand/5 px-3 py-2 text-xs text-brand"><Loader2 className="size-3.5 animate-spin" /> <Shimmer>{workflowSteps[Math.min(workflowIndex, workflowSteps.length - 1)]?.detail ?? "Finishing analysis"}…</Shimmer></div>}
+                 {isAnalyzing && <div className="mt-3 flex items-center gap-2 rounded-lg bg-brand/5 px-3 py-2 text-xs text-brand"><Loader2 className="size-3.5 animate-spin" /> <Shimmer>{`${workflowSteps[Math.min(workflowIndex, workflowSteps.length - 1)]?.detail ?? "Finishing analysis"}…`}</Shimmer></div>}
               </section>
 
               <section className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Analysis statistics">
@@ -455,7 +455,7 @@ function ContractLens() {
                     <div className="flex items-start justify-between gap-3"><div><div className="flex items-center gap-2"><span className="size-2 animate-pulse rounded-full bg-accent" /><h2 className="text-sm font-semibold text-primary-foreground">Ask ContractLens</h2></div><p className="mt-1 text-xs text-ink-foreground/55">Grounded answers from this contract.</p></div><Button aria-label="Chat help" className="text-ink-foreground/60 hover:bg-primary-foreground/10 hover:text-primary-foreground" size="icon" variant="ghost"><CircleHelp /></Button></div>
                      <Conversation className="mt-4 min-h-0 flex-1"><ConversationContent className="gap-4 p-0">{chatMessages.map((message) => <Message from={message.role} key={message.id}><MessageContent className={message.role === "user" ? "bg-primary text-primary-foreground" : "!text-ink-foreground/80"}><MessageResponse>{message.text}</MessageResponse></MessageContent></Message>)}{isAnalyzing && <Message from="assistant"><MessageContent className="!text-ink-foreground/55"><Shimmer>Reviewing the evidence…</Shimmer></MessageContent></Message>}</ConversationContent><ConversationScrollButton className="bg-ink text-primary-foreground" /></Conversation>
                     <div className="mt-4 flex flex-wrap gap-1.5"><Suggestion text="What are the payment terms?" onClick={askQuestion} /><Suggestion text="Any automatic renewal clauses?" onClick={askQuestion} /><Suggestion text="What are the major risks?" onClick={askQuestion} /></div>
-                    <PromptInput className="mt-3 border-ink-foreground/15 bg-primary-foreground/5 text-primary-foreground" onSubmit={handleChatSubmit}><PromptInputTextarea className="min-h-12 text-xs text-primary-foreground placeholder:text-ink-foreground/40" onChange={(event) => setChatInput(event.target.value)} placeholder="Ask about this contract…" value={chatInput} /><PromptInputFooter className="justify-end border-0"><PromptInputSubmit className="bg-accent text-accent-foreground hover:bg-accent/90" /></PromptInputFooter></PromptInput>
+                     <PromptInput className="mt-3 border-ink-foreground/15 bg-primary-foreground/5 text-primary-foreground" onSubmit={(message, event) => { handleChatSubmit(event); if (message.text !== chatInput) askQuestion(message.text); }}><PromptInputTextarea className="min-h-12 text-xs text-primary-foreground placeholder:text-ink-foreground/40" onChange={(event) => setChatInput(event.target.value)} placeholder="Ask about this contract…" value={chatInput} /><PromptInputFooter className="justify-end border-0"><PromptInputSubmit className="bg-accent text-accent-foreground hover:bg-accent/90" /></PromptInputFooter></PromptInput>
                   </Card>
 
                    <Card className="scroll-mt-24 border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6" id="actions-section">
