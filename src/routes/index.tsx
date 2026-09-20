@@ -418,21 +418,21 @@ function ContractLens() {
                     </div>
                   </Card>
 
-                   <Card className="scroll-mt-24 border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6" id="risks-section">
+                    <Card className="border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6">
                     <SectionHeading eyebrow="Key clauses" title="What the agent found" action={<Button className="gap-1.5 text-xs" size="sm" variant="ghost">View all <ChevronRight /></Button>} />
                     <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                       {clauses.map(([title, description, source]) => <ClauseCard description={description} key={title} source={source} title={title} />)}
                     </div>
                   </Card>
 
-                   <Card className="scroll-mt-24 border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6" id="obligations-section">
+                    <Card className="scroll-mt-24 border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6" id="risks-section">
                     <SectionHeading eyebrow="Risk detection" title="Prioritized for action" action={<Button className="gap-1.5 text-xs" onClick={() => setShowRisksOnly((value) => !value)} size="sm" variant="ghost">{showRisksOnly ? "Show all" : "Focus high risk"} <ShieldAlert /></Button>} />
                     <div className="mt-4 space-y-3">
                       {risks.filter((risk) => !showRisksOnly || risk.level === "HIGH").map((risk) => <RiskCard key={risk.title} {...risk} />)}
                     </div>
                   </Card>
 
-                   <Card className="scroll-mt-24 border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6" id="dates-section">
+                    <Card className="scroll-mt-24 border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6" id="obligations-section">
                     <SectionHeading eyebrow="Obligations & deadlines" title="Keep the agreement moving" action={<Button className="gap-1.5 text-xs" onClick={() => setActiveNav("Obligations")} size="sm" variant="ghost">Open tracker <ChevronRight /></Button>} />
                     <div className="mt-4 overflow-x-auto">
                       <table className="w-full min-w-[650px] text-left text-xs">
@@ -442,7 +442,7 @@ function ContractLens() {
                     </div>
                   </Card>
 
-                  <Card className="border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6">
+                  <Card className="scroll-mt-24 border-border/60 bg-card/65 p-5 shadow-soft backdrop-blur-xl sm:p-6" id="dates-section">
                     <SectionHeading eyebrow="Important dates" title="A timeline the team can act on" action={<Button className="gap-1.5 text-xs" onClick={() => setActiveNav("Important Dates")} size="sm" variant="ghost">Open calendar <ChevronRight /></Button>} />
                     <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
                       {dates.map(([date, label, tone], index) => <div className="relative flex gap-3" key={date}>{index < dates.length - 1 && <div className="absolute left-[7px] top-5 hidden h-[calc(100%+1.5rem)] w-px bg-border sm:block" />}<div className={cn("relative z-10 mt-1 size-3 shrink-0 rounded-full ring-4", tone === "alert" || tone === "end" ? "bg-risk-high ring-risk-high/10" : tone === "deadline" ? "bg-risk-medium ring-risk-medium/10" : "bg-brand ring-brand/10")} /><div><p className="font-mono text-[11px] text-muted-foreground">{date}</p><p className="mt-1 text-xs font-medium">{label}</p></div></div>)}
